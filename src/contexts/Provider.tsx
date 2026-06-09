@@ -8,9 +8,9 @@ import { useRouter } from "next/navigation";
 const Provider = ({ children }: PropsWithChildren) => {
   const router = useRouter();
   return (
-    <SessionProvider>
-      <HeroUIProvider navigate={router.push}>{children}</HeroUIProvider>
-    </SessionProvider>
+    // <SessionProvider>
+    <HeroUIProvider navigate={router.push}>{children}</HeroUIProvider>
+    // </SessionProvider>
   );
 };
 
