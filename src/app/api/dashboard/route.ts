@@ -1,6 +1,17 @@
 import { jira } from "@/lib/jira";
 import { NextResponse } from "next/server";
 
+const ALL_TOWERS = [
+  "Finance",
+  "Marketing",
+  "HR",
+  "Sales",
+  "Infrastructure",
+  "Security",
+  "Network",
+  "Application",
+];
+
 const priorityMap: Record<string, string> = {
   Highest: "P1",
   High: "P2",
@@ -10,66 +21,64 @@ const priorityMap: Record<string, string> = {
 };
 
 export async function GET() {
-  try {
-    const response = await jira.post("/rest/api/3/search/jql", {
-      jql: `
-        assignee IS EMPTY
-        AND statusCategory != Done
-      `,
-      fields: ["summary", "priority", "assignee", process.env.JIRA_TOWER_FIELD],
-      maxResults: 1000,
+  const response = await jira.post("/rest/api/3/search/jql", {
+    jql: `
+      assignee IS EMPTY
+      AND statusCategory != Done
+    `,
+    fields: ["summary", "priority", "status", process.env.JIRA_TOWER_FIELD],
+    maxResults: 1000,
+  });
+
+  const issues = response.data.issues;
+  const towerField = process.env.JIRA_TOWER_FIELD!;
+
+  const matrix: any = {};
+  const incidents: any = {};
+
+  ALL_TOWERS.forEach((tower) => {
+    matrix[tower] = {
+      P1: 0,
+      P2: 0,
+      P3: 0,
+      P4: 0,
+      P5: 0,
+      Total: 0,
+    };
+
+    incidents[tower] = {
+      P1: [],
+      P2: [],
+      P3: [],
+      P4: [],
+      P5: [],
+    };
+  });
+
+  issues.forEach((issue: any) => {
+    const tower = issue.fields?.[towerField]?.value || "Unknown";
+
+    const priority = priorityMap[issue.fields.priority?.name] || "P3";
+
+    matrix[tower][priority]++;
+    matrix[tower].Total++;
+
+    incidents[tower][priority].push({
+      key: issue.key,
+      summary: issue.fields.summary,
+      status: issue.fields.status?.name,
     });
+  });
 
-    const issues = response.data.issues;
-    const towerField = process.env.JIRA_TOWER_FIELD!;
-
-    const matrix: Record<
-      string,
-      {
-        P1: number;
-        P2: number;
-        P3: number;
-        P4: number;
-        P5: number;
-        Total: number;
-      }
-    > = {};
-
-    issues.forEach((issue: any) => {
-      const tower = issue.fields?.[towerField]?.value || "Unknown";
-
-      const jiraPriority = issue.fields?.priority?.name || "Medium";
-
-      const priority = priorityMap[jiraPriority] || "P3";
-
-      if (!matrix[tower]) {
-        matrix[tower] = {
-          P1: 0,
-          P2: 0,
-          P3: 0,
-          P4: 0,
-          P5: 0,
-          Total: 0,
-        };
-      }
-
-      matrix[tower][priority as keyof (typeof matrix)[string]]++;
-
-      matrix[tower].Total++;
-    });
-
-    return NextResponse.json(matrix);
-  } catch (error: any) {
-    console.error(error.response?.data || error);
-
-    return NextResponse.json(
-      {
-        error: "Failed to fetch Jira issues",
-        details: error.response?.data,
-      },
-      {
-        status: 500,
-      },
-    );
-  }
+  return NextResponse.json({
+    matrix,
+    incidents,
+    kpis: {
+      totalTickets: issues.length,
+      criticalTickets: Object.values(matrix).reduce(
+        (sum: number, tower: any) => sum + tower.P1,
+        0,
+      ),
+    },
+  });
 }

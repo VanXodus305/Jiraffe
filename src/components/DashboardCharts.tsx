@@ -1,48 +1,79 @@
 "use client";
 
 import {
+  Card,
+  CardBody,
+} from "@heroui/react";
+
+import {
+  ResponsiveContainer,
   BarChart,
   Bar,
-  ResponsiveContainer,
   XAxis,
   YAxis,
   Tooltip,
+  CartesianGrid,
 } from "recharts";
 
-import { Card, CardBody } from "@heroui/react";
-import { DashboardData } from "@/types/dashboard";
-
 interface Props {
-  data: DashboardData;
+  data: any;
 }
 
 export default function DashboardCharts({
   data,
 }: Props) {
-  const chartData = Object.entries(data).map(
-    ([tower, values]) => ({
-      tower,
-      total: values.Total,
-    })
-  );
+  const chartData =
+    Object.entries(data).map(
+      ([tower, values]: any) => ({
+        tower,
+        total: values.Total,
+      })
+    );
 
   return (
-    <Card className="border border-zinc-800 mt-8">
+    <Card
+      className="
+        mt-6
+        border-none
+        shadow-xl
+      "
+    >
       <CardBody>
-        <h2 className="text-xl font-semibold mb-4">
-          Tower Distribution
-        </h2>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold">
+            Incident Distribution
+          </h2>
 
-        <div className="h-[350px]">
+          <p className="text-slate-500">
+            Open incidents by tower
+          </p>
+        </div>
+
+        <div className="h-[280px]">
           <ResponsiveContainer
             width="100%"
             height="100%"
           >
-            <BarChart data={chartData}>
-              <XAxis dataKey="tower" />
+            <BarChart
+              data={chartData}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+              />
+
+              <XAxis
+                dataKey="tower"
+              />
+
               <YAxis />
+
               <Tooltip />
-              <Bar dataKey="total" />
+
+              <Bar
+                dataKey="total"
+                radius={[10, 10, 0, 0]}
+                fill="#4f46e5"
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

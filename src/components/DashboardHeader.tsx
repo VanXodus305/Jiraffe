@@ -1,12 +1,34 @@
+import { Chip } from "@heroui/react";
+
 export default function DashboardHeader() {
   return (
-    <div className="mb-8">
-      <h1 className="text-4xl md:text-5xl font-bold">
-        Incident Monitoring Dashboard
+    <div className="mb-10">
+      <Chip
+        color="primary"
+        variant="flat"
+        className="mb-4"
+      >
+        LIVE MONITORING
+      </Chip>
+
+      <h1
+        className="
+          text-6xl
+          font-black
+          tracking-tight
+          bg-gradient-to-r
+          from-blue-600
+          via-indigo-600
+          to-violet-600
+          bg-clip-text
+          text-transparent
+        "
+      >
+        Jiraffe Command Center
       </h1>
 
-      <p className="text-zinc-400 mt-2">
-        Real-time Jira Incident Monitoring
+      <p className="text-slate-600 mt-4 text-lg">
+        Real-time Jira Incident Operations Dashboard
       </p>
     </div>
   );

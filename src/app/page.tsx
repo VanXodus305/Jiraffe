@@ -7,11 +7,9 @@ import KPICards from "@/components/KPICards";
 import PriorityMatrix from "@/components/PriorityMatrix";
 import DashboardCharts from "@/components/DashboardCharts";
 
-import { DashboardData } from "@/types/dashboard";
-
 export default function Home() {
-  const [data, setData] =
-    useState<DashboardData>({});
+  const [dashboard, setDashboard] =
+    useState<any>(null);
 
   const [loading, setLoading] =
     useState(true);
@@ -23,10 +21,10 @@ export default function Home() {
       );
 
       const result = await response.json();
-      console.log(data);
-      setData(result);
-    } catch (err) {
-      console.error(err);
+
+      setDashboard(result);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -35,31 +33,54 @@ export default function Home() {
   useEffect(() => {
     loadData();
 
-    const interval = setInterval(
-      loadData,
-      30000
-    );
+    const interval = setInterval(() => {
+      loadData();
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) {
+  if (loading || !dashboard) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div
+        className="
+          min-h-screen
+          flex
+          items-center
+          justify-center
+          text-white
+          text-xl
+        "
+      >
         Loading Dashboard...
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
+    <main
+      className="
+    max-w-[1500px]
+    mx-auto
+    px-4
+    py-6
+  "
+
+    >
       <DashboardHeader />
 
-      <KPICards data={data} />
+      <KPICards
+        data={dashboard.matrix}
+      />
 
-      <PriorityMatrix data={data} />
+      <PriorityMatrix
+        matrix={dashboard.matrix}
+        incidents={dashboard.incidents}
+      />
 
-      <DashboardCharts data={data} />
+      <DashboardCharts
+        data={dashboard.matrix}
+      />
     </main>
   );
 }
