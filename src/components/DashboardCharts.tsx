@@ -15,8 +15,13 @@ import {
   CartesianGrid,
 } from "recharts";
 
+import {
+  DashboardMatrix,
+  TowerMatrix,
+} from "@/types/dashboard";
+
 interface Props {
-  data: any;
+  data: DashboardMatrix;
 }
 
 export default function DashboardCharts({
@@ -24,20 +29,17 @@ export default function DashboardCharts({
 }: Props) {
   const chartData =
     Object.entries(data).map(
-      ([tower, values]: any) => ({
+      ([tower, values]: [
+        string,
+        TowerMatrix,
+      ]) => ({
         tower,
         total: values.Total,
       })
     );
 
   return (
-    <Card
-      className="
-        mt-6
-        border-none
-        shadow-xl
-      "
-    >
+    <Card className="mt-6 border-none shadow-xl">
       <CardBody>
         <div className="mb-6">
           <h2 className="text-2xl font-bold">
@@ -54,16 +56,10 @@ export default function DashboardCharts({
             width="100%"
             height="100%"
           >
-            <BarChart
-              data={chartData}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-              />
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
 
-              <XAxis
-                dataKey="tower"
-              />
+              <XAxis dataKey="tower" />
 
               <YAxis />
 

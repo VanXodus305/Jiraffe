@@ -9,11 +9,13 @@ import {
   AlertTriangle,
   Activity,
   Building2,
-  Ticket
+  Ticket,
 } from "lucide-react";
 
+import { DashboardMatrix } from "@/types/dashboard";
+
 interface Props {
-  data: any;
+  data: DashboardMatrix;
 }
 
 export default function KPICards({

@@ -1,6 +1,12 @@
 import { jira } from "@/lib/jira";
 import { NextResponse } from "next/server";
 
+import {
+  DashboardMatrix,
+  DashboardIncidents,
+  TowerMatrix,
+} from "@/types/dashboard";
+
 const ALL_TOWERS = [
   "Finance",
   "Marketing",
@@ -20,6 +26,24 @@ const priorityMap: Record<string, string> = {
   Lowest: "P5",
 };
 
+interface JiraIssue {
+  key: string;
+
+  fields: {
+    summary: string;
+
+    status?: {
+      name: string;
+    };
+
+    priority?: {
+      name: string;
+    };
+
+    [key: string]: unknown;
+  };
+}
+
 export async function GET() {
   const response = await jira.post("/rest/api/3/search/jql", {
     jql: `
@@ -33,9 +57,8 @@ export async function GET() {
   const issues = response.data.issues;
   const towerField = process.env.JIRA_TOWER_FIELD!;
 
-  const matrix: any = {};
-  const incidents: any = {};
-
+  const matrix: DashboardMatrix = {};
+  const incidents: DashboardIncidents = {};
   ALL_TOWERS.forEach((tower) => {
     matrix[tower] = {
       P1: 0,
@@ -55,11 +78,16 @@ export async function GET() {
     };
   });
 
-  issues.forEach((issue: any) => {
-    const tower = issue.fields?.[towerField]?.value || "Unknown";
+  issues.forEach((issue: JiraIssue) => {
+    const towerValue = issue.fields[towerField] as { value?: string };
 
-    const priority = priorityMap[issue.fields.priority?.name] || "P3";
+    const tower = towerValue?.value || "Unknown";
 
+    if (!(tower in matrix)) {
+      return;
+    }
+    const priority = (priorityMap[issue.fields.priority?.name ?? ""] ??
+      "P3") as "P1" | "P2" | "P3" | "P4" | "P5";
     matrix[tower][priority]++;
     matrix[tower].Total++;
 
@@ -76,7 +104,7 @@ export async function GET() {
     kpis: {
       totalTickets: issues.length,
       criticalTickets: Object.values(matrix).reduce(
-        (sum: number, tower: any) => sum + tower.P1,
+        (sum: number, tower: TowerMatrix) => sum + tower.P1,
         0,
       ),
     },

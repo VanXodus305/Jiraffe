@@ -7,9 +7,13 @@ import KPICards from "@/components/KPICards";
 import PriorityMatrix from "@/components/PriorityMatrix";
 import DashboardCharts from "@/components/DashboardCharts";
 
+import { DashboardResponse } from "@/types/dashboard";
+
 export default function Home() {
   const [dashboard, setDashboard] =
-    useState<any>(null);
+    useState<DashboardResponse | null>(
+      null
+    );
 
   const [loading, setLoading] =
     useState(true);
@@ -20,7 +24,8 @@ export default function Home() {
         "/api/dashboard"
       );
 
-      const result = await response.json();
+      const result: DashboardResponse =
+        await response.json();
 
       setDashboard(result);
     } catch (error) {
@@ -33,40 +38,25 @@ export default function Home() {
   useEffect(() => {
     loadData();
 
-    const interval = setInterval(() => {
-      loadData();
-    }, 5000);
+    const interval = setInterval(
+      loadData,
+      5000
+    );
 
-    return () => clearInterval(interval);
+    return () =>
+      clearInterval(interval);
   }, []);
 
   if (loading || !dashboard) {
     return (
-      <div
-        className="
-          min-h-screen
-          flex
-          items-center
-          justify-center
-          text-white
-          text-xl
-        "
-      >
+      <div className="min-h-screen flex items-center justify-center text-xl">
         Loading Dashboard...
       </div>
     );
   }
 
   return (
-    <main
-      className="
-    max-w-[1500px]
-    mx-auto
-    px-4
-    py-6
-  "
-
-    >
+    <main className="max-w-[1500px] mx-auto px-4 py-6">
       <DashboardHeader />
 
       <KPICards

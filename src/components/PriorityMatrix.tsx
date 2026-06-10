@@ -1,24 +1,34 @@
 "use client";
 
 import {
+  DashboardMatrix,
+  DashboardIncidents,
+  Incident,
+  PriorityKey,
+} from "@/types/dashboard";
+
+import {
   Card,
   CardBody,
   Chip,
 } from "@heroui/react";
 
 interface Props {
-  matrix: any;
-  incidents: any;
+  matrix: DashboardMatrix;
+  incidents: DashboardIncidents;
 }
 
-const PRIORITIES = [
-  "P1",
-  "P2",
-  "P3",
-  "P4",
-  "P5",
-  "Total",
-];
+const PRIORITIES: (
+  | PriorityKey
+  | "Total"
+)[] = [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "Total",
+  ];
 
 const priorityConfig = {
   P1: {
@@ -164,13 +174,10 @@ export default function PriorityMatrix({
                     }
 
                     const count =
-                      matrix[tower]?.[priority] ||
-                      0;
+                      matrix[tower][priority];
 
                     const towerIncidents =
-                      incidents?.[tower]?.[
-                      priority
-                      ] || [];
+                      incidents[tower][priority];
 
                     const config =
                       priorityConfig[
@@ -212,7 +219,7 @@ export default function PriorityMatrix({
                                 0 ? (
                                 towerIncidents.map(
                                   (
-                                    incident: any
+                                    incident: Incident
                                   ) => (
                                     <Card
                                       key={
